@@ -1,0 +1,789 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="UTF-8"><title>Game</title><script type="text/javascript" src="elm-runtime.js"></script><script type="text/javascript">Elm.Game = Elm.Game || {};
+Elm.Game.make = function (_elm) {
+   "use strict";
+   _elm.Game = _elm.Game || {};
+   if (_elm.Game.values)
+   return _elm.Game.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Game";
+   var Array = Elm.Array.make(_elm);
+   var Basics = Elm.Basics.make(_elm);
+   var Board = Elm.Board.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Consts = Elm.Consts.make(_elm);
+   var Debug = Elm.Debug.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Location = Elm.Location.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Mouse = Elm.Mouse.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var change = F3(function (b,
+   mp,
+   cp) {
+      return Board.asElement(Board.moveHighlight(mp)(A3(List.foldl,
+      F2(function (c,brd) {
+         return A2(Board.clearFog,
+         c,
+         brd);
+      }),
+      b,
+      cp)));
+   });
+   var clickSignal = A2(Signal.sampleOn,
+   Mouse.clicks,
+   Mouse.position);
+   var clicks = A3(Signal.foldp,
+   F2(function (x,y) {
+      return {ctor: "::"
+             ,_0: x
+             ,_1: y};
+   }),
+   _L.fromArray([]),
+   clickSignal);
+   var game = {_: {}
+              ,board: A2(Board.empty,5,5)};
+   var main = A2(Signal._op["~"],
+   A2(Signal._op["<~"],
+   change(game.board),
+   Mouse.position),
+   clicks);
+   _elm.Game.values = {_op: _op
+                      ,game: game
+                      ,clickSignal: clickSignal
+                      ,clicks: clicks
+                      ,change: change
+                      ,main: main};
+   return _elm.Game.values;
+};Elm.Board = Elm.Board || {};
+Elm.Board.make = function (_elm) {
+   "use strict";
+   _elm.Board = _elm.Board || {};
+   if (_elm.Board.values)
+   return _elm.Board.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Board";
+   var Array = Elm.Array.make(_elm);
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Consts = Elm.Consts.make(_elm);
+   var Debug = Elm.Debug.make(_elm);
+   var Enemy = Elm.Enemy.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Location = Elm.Location.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Table = Elm.Table.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var Utils = Elm.Utils.make(_elm);
+   var _op = {};
+   var drawBoardWithNumbers = function (b) {
+      return function () {
+         var topNumbersHeight = Basics.toFloat(Table.longestRowSize(Table.rowNumbers(Utils.transposeTable(b.theMap)))) * Consts.cell_size;
+         var leftNumbersWidth = Basics.toFloat(Table.longestRowSize(Table.rowNumbers(b.theMap))) * Consts.cell_size;
+         var topNumbers = A2(Table.drawNumbers,
+         Table.Column,
+         b.theMap);
+         var leftNumbers = A2(Table.drawNumbers,
+         Table.Row,
+         b.theMap);
+         var foggedMap = Graphics.Collage.group(_L.fromArray([Table.drawTable(b.theMap)
+                                                             ,Table.drawTable(b.fog)]));
+         return Graphics.Collage.group(_L.fromArray([A2(Graphics.Collage.moveY,
+                                                    0 - topNumbersHeight,
+                                                    leftNumbers)
+                                                    ,A2(Graphics.Collage.moveX,
+                                                    leftNumbersWidth,
+                                                    topNumbers)
+                                                    ,A2(Graphics.Collage.move,
+                                                    {ctor: "_Tuple2"
+                                                    ,_0: leftNumbersWidth
+                                                    ,_1: 0 - topNumbersHeight},
+                                                    foggedMap)]));
+      }();
+   };
+   var drawHighlight = function (_v0) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var fy = (0 - (Basics.toFloat(_v0._1) + 0.5)) * Consts.cell_size;
+                 var fx = (Basics.toFloat(_v0._0) + 0.5) * Consts.cell_size;
+                 return Graphics.Collage.move({ctor: "_Tuple2"
+                                              ,_0: fx
+                                              ,_1: fy})(Graphics.Collage.outlined(Graphics.Collage.dashed(Color.black))(A2(Graphics.Collage.rect,
+                 Consts.cell_size,
+                 Consts.cell_size)));
+              }();}
+         _E.Case($moduleName,
+         "between lines 98 and 104");
+      }();
+   };
+   var gridToBoard = F2(function (b,
+   _v4) {
+      return function () {
+         switch (_v4.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var topNumbersHeight = Table.longestRowSize(Table.rowNumbers(Utils.transposeTable(b.theMap)));
+                 var leftNumbersWidth = Table.longestRowSize(Table.rowNumbers(b.theMap));
+                 return {ctor: "_Tuple2"
+                        ,_0: _v4._0 - leftNumbersWidth
+                        ,_1: _v4._1 - topNumbersHeight};
+              }();}
+         _E.Case($moduleName,
+         "between lines 74 and 78");
+      }();
+   });
+   var screenToGrid = function (_v8) {
+      return function () {
+         switch (_v8.ctor)
+         {case "_Tuple2":
+            return {ctor: "_Tuple2"
+                   ,_0: Basics.floor(Basics.toFloat(_v8._0) / Consts.cell_size)
+                   ,_1: Basics.floor(Basics.toFloat(_v8._1) / Consts.cell_size)};}
+         _E.Case($moduleName,
+         "between lines 68 and 69");
+      }();
+   };
+   var moveHighlight = F2(function (l,
+   b) {
+      return _U.replace([["highlightedCell"
+                         ,screenToGrid(l)]],
+      b);
+   });
+   var clearFog = F2(function (l,
+   b) {
+      return function () {
+         var newL = gridToBoard(b)(screenToGrid(l));
+         return _U.replace([["fog"
+                            ,A3(Utils.set2d,
+                            newL,
+                            Table.Fog(Table.Revealed),
+                            b.fog)]],
+         b);
+      }();
+   });
+   var seenMap = function (b) {
+      return A2(Utils.indexedMap2d,
+      F3(function (x,y,e) {
+         return function () {
+            var _v12 = A2(Utils.get2d,
+            {ctor: "_Tuple2",_0: x,_1: y},
+            b.fog);
+            switch (_v12.ctor)
+            {case "Just":
+               switch (_v12._0.ctor)
+                 {case "Fog":
+                    switch (_v12._0._0.ctor)
+                      {case "Revealed": return e;}
+                      break;}
+                 break;}
+            return Table.Map(Table.Empty);
+         }();
+      }),
+      b.theMap);
+   };
+   var height = function (b) {
+      return Array.length(b.theMap) + List.maximum(Array.toList(A2(Array.map,
+      function ($) {
+         return List.length(Table.sumRow(Table.Map(Table.Road))($));
+      },
+      Utils.transposeTable(b.theMap))));
+   };
+   var width = function (b) {
+      return List.maximum(Array.toList(A2(Array.map,
+      function (r) {
+         return Array.length(r) + function ($) {
+            return List.length(Table.sumRow(Table.Map(Table.Road))($));
+         }(r);
+      },
+      b.theMap)));
+   };
+   var asElement = function (b) {
+      return function () {
+         var bheight = Basics.floor(Consts.cell_size) * height(b);
+         var bwidth = Basics.floor(Consts.cell_size) * width(b);
+         var collageOffset = {ctor: "_Tuple2"
+                             ,_0: Basics.toFloat(0 - bwidth) / 2
+                             ,_1: Basics.toFloat(bheight) / 2};
+         return A2(Graphics.Collage.collage,
+         bwidth,
+         bheight)(List.map(Graphics.Collage.move(collageOffset))(_L.append(_L.fromArray([drawBoardWithNumbers(b)
+                                                                                        ,drawHighlight(b.highlightedCell)]),
+         A2(List.map,
+         Enemy.asForm,
+         b.enemies))));
+      }();
+   };
+   var empty = F2(function (w,h) {
+      return {_: {}
+             ,enemies: _L.fromArray([])
+             ,fog: A2(Table.fullFog,w,h)
+             ,highlightedCell: {ctor: "_Tuple2"
+                               ,_0: 0
+                               ,_1: 0}
+             ,theMap: Array.fromList(_L.fromArray([Array.fromList(_L.fromArray([Table.Map(Table.Road)
+                                                                               ,Table.Map(Table.Road)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Road)]))
+                                                  ,Array.fromList(_L.fromArray([Table.Map(Table.Road)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Road)]))
+                                                  ,Array.fromList(_L.fromArray([Table.Map(Table.Road)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Empty)]))
+                                                  ,Array.fromList(_L.fromArray([Table.Map(Table.Road)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Road)
+                                                                               ,Table.Map(Table.Road)]))
+                                                  ,Array.fromList(_L.fromArray([Table.Map(Table.Road)
+                                                                               ,Table.Map(Table.Road)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Road)]))]))};
+   });
+   var Board = F4(function (a,
+   b,
+   c,
+   d) {
+      return {_: {}
+             ,enemies: d
+             ,fog: b
+             ,highlightedCell: c
+             ,theMap: a};
+   });
+   _elm.Board.values = {_op: _op
+                       ,empty: empty
+                       ,width: width
+                       ,height: height
+                       ,seenMap: seenMap
+                       ,screenToGrid: screenToGrid
+                       ,gridToBoard: gridToBoard
+                       ,moveHighlight: moveHighlight
+                       ,clearFog: clearFog
+                       ,drawHighlight: drawHighlight
+                       ,drawBoardWithNumbers: drawBoardWithNumbers
+                       ,asElement: asElement
+                       ,Board: Board};
+   return _elm.Board.values;
+};Elm.Enemy = Elm.Enemy || {};
+Elm.Enemy.make = function (_elm) {
+   "use strict";
+   _elm.Enemy = _elm.Enemy || {};
+   if (_elm.Enemy.values)
+   return _elm.Enemy.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Enemy";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Consts = Elm.Consts.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Location = Elm.Location.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Table = Elm.Table.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var asForm = function (enemy) {
+      return Graphics.Collage.move(enemy.location)(Graphics.Collage.filled(Color.red)(Graphics.Collage.circle(Consts.cell_size / 3)));
+   };
+   var Enemy = function (a) {
+      return {_: {},location: a};
+   };
+   _elm.Enemy.values = {_op: _op
+                       ,asForm: asForm
+                       ,Enemy: Enemy};
+   return _elm.Enemy.values;
+};Elm.Table = Elm.Table || {};
+Elm.Table.make = function (_elm) {
+   "use strict";
+   _elm.Table = _elm.Table || {};
+   if (_elm.Table.values)
+   return _elm.Table.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Table";
+   var Array = Elm.Array.make(_elm);
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Consts = Elm.Consts.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Location = Elm.Location.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var Utils = Elm.Utils.make(_elm);
+   var _op = {};
+   var offsetCell = Graphics.Collage.move({ctor: "_Tuple2"
+                                          ,_0: Consts.cell_size / 2
+                                          ,_1: (0 - Consts.cell_size) / 2});
+   var numbers_style = Text.defaultStyle;
+   var styleNumber = function ($) {
+      return offsetCell(Graphics.Collage.toForm(A3(Graphics.Element.container,
+      Consts.icell_size,
+      Consts.icell_size,
+      Graphics.Element.middle)(Text.centered(Text.style(numbers_style)(Text.toText(String.show($)))))));
+   };
+   var longestRowSize = function (ns) {
+      return List.maximum(Array.toList(A2(Array.map,
+      Array.length,
+      ns)));
+   };
+   var sumRow = F2(function (filled,
+   r) {
+      return function () {
+         var l = List.map(List.length)(Utils.groupBy(F2(function (x,
+         y) {
+            return _U.eq(x,y);
+         })(filled))(Array.toList(r)));
+         return function () {
+            switch (l.ctor)
+            {case "[]":
+               return _L.fromArray([0]);}
+            return l;
+         }();
+      }();
+   });
+   var Column = {ctor: "Column"};
+   var Row = {ctor: "Row"};
+   var drawNumbersRow = F3(function (dir,
+   max_len,
+   nums) {
+      return function () {
+         var moveFunc = function (f) {
+            return function () {
+               switch (dir.ctor)
+               {case "Column":
+                  return Graphics.Collage.moveY(0 - f);
+                  case "Row":
+                  return Graphics.Collage.moveX(f);}
+               _E.Case($moduleName,
+               "between lines 66 and 69");
+            }();
+         };
+         var margin = max_len - Array.length(nums);
+         return moveFunc(Basics.toFloat(margin) * Consts.cell_size)(Graphics.Collage.group(Array.toList(A2(Array.indexedMap,
+         F2(function (i,n) {
+            return moveFunc(Basics.toFloat(i) * Consts.cell_size)(styleNumber(n));
+         }),
+         nums))));
+      }();
+   });
+   var Map = function (a) {
+      return {ctor: "Map",_0: a};
+   };
+   var Fog = function (a) {
+      return {ctor: "Fog",_0: a};
+   };
+   var Revealed = {ctor: "Revealed"};
+   var Hidden = {ctor: "Hidden"};
+   var fullFog = F2(function (w,
+   h) {
+      return Array.repeat(h)(Array.fromList({ctor: "::"
+                                            ,_0: Fog(Revealed)
+                                            ,_1: A2(List.repeat,
+                                            w - 1,
+                                            Fog(Hidden))}));
+   });
+   var Tower = {ctor: "Tower"};
+   var Empty = {ctor: "Empty"};
+   var Road = {ctor: "Road"};
+   var rowNumbers = Array.map(function ($) {
+      return Array.fromList(sumRow(Map(Road))($));
+   });
+   var drawNumbers = F2(function (dir,
+   tab) {
+      return function () {
+         var moveFunc = function (f) {
+            return function () {
+               switch (dir.ctor)
+               {case "Column":
+                  return Graphics.Collage.moveX(f);
+                  case "Row":
+                  return Graphics.Collage.moveY(0 - f);}
+               _E.Case($moduleName,
+               "between lines 85 and 88");
+            }();
+         };
+         var t = function () {
+            switch (dir.ctor)
+            {case "Column":
+               return Utils.transposeTable(tab);
+               case "Row": return tab;}
+            _E.Case($moduleName,
+            "between lines 81 and 84");
+         }();
+         var numbers = rowNumbers(t);
+         return Graphics.Collage.group(Array.toList(A2(Array.indexedMap,
+         F2(function (i,r) {
+            return moveFunc(Basics.toFloat(i) * Consts.cell_size)(A3(drawNumbersRow,
+            dir,
+            longestRowSize(numbers),
+            r));
+         }),
+         numbers)));
+      }();
+   });
+   var drawCell = function (c) {
+      return offsetCell(function () {
+         switch (c.ctor)
+         {case "Fog":
+            return function () {
+                 switch (c._0.ctor)
+                 {case "Hidden":
+                    return Graphics.Collage.filled(Color.lightGray)(A2(Graphics.Collage.rect,
+                      Consts.cell_size,
+                      Consts.cell_size));
+                    case "Revealed":
+                    return Graphics.Collage.toForm(Graphics.Element.empty);}
+                 _E.Case($moduleName,
+                 "between lines 107 and 109");
+              }();
+            case "Map": return function () {
+                 switch (c._0.ctor)
+                 {case "Empty":
+                    return Graphics.Collage.filled(Color.darkCharcoal)(A2(Graphics.Collage.rect,
+                      Consts.cell_size,
+                      Consts.cell_size));
+                    case "Road":
+                    return Graphics.Collage.filled(Color.lightGreen)(A2(Graphics.Collage.rect,
+                      Consts.cell_size,
+                      Consts.cell_size));
+                    case "Tower":
+                    return Graphics.Collage.group(_L.fromArray([Graphics.Collage.filled(Color.darkCharcoal)(A2(Graphics.Collage.rect,
+                                                               Consts.cell_size,
+                                                               Consts.cell_size))
+                                                               ,Graphics.Collage.filled(Color.lightBlue)(Graphics.Collage.ngon(6)(Consts.cell_size / 2))]));}
+                 _E.Case($moduleName,
+                 "between lines 100 and 107");
+              }();}
+         _E.Case($moduleName,
+         "between lines 99 and 109");
+      }());
+   };
+   var drawRow = function (r) {
+      return Graphics.Collage.group(Array.toList(A2(Array.indexedMap,
+      F2(function (i,c) {
+         return Graphics.Collage.moveX(Basics.toFloat(i) * Consts.cell_size)(drawCell(c));
+      }),
+      r)));
+   };
+   var drawTable = function ($) {
+      return Graphics.Collage.group(Array.toList(Array.indexedMap(F2(function (i,
+      r) {
+         return Graphics.Collage.moveY(0 - Basics.toFloat(i) * Consts.cell_size)(drawRow(r));
+      }))($)));
+   };
+   _elm.Table.values = {_op: _op
+                       ,fullFog: fullFog
+                       ,sumRow: sumRow
+                       ,longestRowSize: longestRowSize
+                       ,rowNumbers: rowNumbers
+                       ,numbers_style: numbers_style
+                       ,offsetCell: offsetCell
+                       ,styleNumber: styleNumber
+                       ,drawNumbersRow: drawNumbersRow
+                       ,drawNumbers: drawNumbers
+                       ,drawCell: drawCell
+                       ,drawRow: drawRow
+                       ,drawTable: drawTable
+                       ,Road: Road
+                       ,Empty: Empty
+                       ,Tower: Tower
+                       ,Hidden: Hidden
+                       ,Revealed: Revealed
+                       ,Fog: Fog
+                       ,Map: Map
+                       ,Row: Row
+                       ,Column: Column};
+   return _elm.Table.values;
+};Elm.Consts = Elm.Consts || {};
+Elm.Consts.make = function (_elm) {
+   "use strict";
+   _elm.Consts = _elm.Consts || {};
+   if (_elm.Consts.values)
+   return _elm.Consts.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Consts";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var icell_size = 40;
+   var cell_size = 40.0;
+   _elm.Consts.values = {_op: _op
+                        ,cell_size: cell_size
+                        ,icell_size: icell_size};
+   return _elm.Consts.values;
+};Elm.Location = Elm.Location || {};
+Elm.Location.make = function (_elm) {
+   "use strict";
+   _elm.Location = _elm.Location || {};
+   if (_elm.Location.values)
+   return _elm.Location.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Location";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   _elm.Location.values = {_op: _op};
+   return _elm.Location.values;
+};Elm.Utils = Elm.Utils || {};
+Elm.Utils.make = function (_elm) {
+   "use strict";
+   _elm.Utils = _elm.Utils || {};
+   if (_elm.Utils.values)
+   return _elm.Utils.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Utils";
+   var Array = Elm.Array.make(_elm);
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var transpose2dList = function (rows) {
+      return function () {
+         var _v0 = List.length(List.head(rows));
+         switch (_v0)
+         {case 0:
+            return _L.fromArray([]);}
+         return {ctor: "::"
+                ,_0: A2(List.map,List.head,rows)
+                ,_1: transpose2dList(A2(List.map,
+                List.tail,
+                rows))};
+      }();
+   };
+   var transposeTable = function (t) {
+      return function () {
+         var rows = Array.toList(A2(Array.map,
+         Array.toList,
+         t));
+         return Array.fromList(List.map(Array.fromList)(transpose2dList(rows)));
+      }();
+   };
+   var dropWhile = F2(function (cond,
+   xs) {
+      return function () {
+         switch (xs.ctor)
+         {case "[]":
+            return _L.fromArray([]);}
+         return cond(List.head(xs)) ? A2(dropWhile,
+         cond,
+         List.tail(xs)) : xs;
+      }();
+   });
+   var takeWhile = F2(function (cond,
+   xs) {
+      return function () {
+         switch (xs.ctor)
+         {case "[]":
+            return _L.fromArray([]);}
+         return cond(List.head(xs)) ? {ctor: "::"
+                                      ,_0: List.head(xs)
+                                      ,_1: A2(takeWhile,
+                                      cond,
+                                      List.tail(xs))} : _L.fromArray([]);
+      }();
+   });
+   var groupBy = F2(function (cond,
+   xs) {
+      return function () {
+         switch (xs.ctor)
+         {case "[]":
+            return _L.fromArray([]);}
+         return function () {
+            var rest = A2(dropWhile,
+            function ($) {
+               return Basics.not(cond($));
+            },
+            xs);
+            return function () {
+               switch (rest.ctor)
+               {case "[]":
+                  return _L.fromArray([]);}
+               return {ctor: "::"
+                      ,_0: A2(takeWhile,cond,rest)
+                      ,_1: A2(groupBy,
+                      cond,
+                      A2(dropWhile,cond,rest))};
+            }();
+         }();
+      }();
+   });
+   var get2d = F2(function (_v5,
+   a) {
+      return function () {
+         switch (_v5.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var _v9 = A2(Array.get,
+                 _v5._1,
+                 a);
+                 switch (_v9.ctor)
+                 {case "Just":
+                    return A2(Array.get,
+                      _v5._0,
+                      _v9._0);
+                    case "Nothing":
+                    return Maybe.Nothing;}
+                 _E.Case($moduleName,
+                 "between lines 20 and 22");
+              }();}
+         _E.Case($moduleName,
+         "between lines 20 and 22");
+      }();
+   });
+   var indexedMap2d = function (f) {
+      return Array.indexedMap(F2(function (y,
+      r) {
+         return A2(Array.indexedMap,
+         F2(function (x,a) {
+            return A3(f,x,y,a);
+         }),
+         r);
+      }));
+   };
+   var set2d = F2(function (_v11,
+   v) {
+      return function () {
+         switch (_v11.ctor)
+         {case "_Tuple2":
+            return indexedMap2d(F3(function (i,
+              j,
+              w) {
+                 return _U.eq(i,
+                 _v11._0) && _U.eq(j,
+                 _v11._1) ? v : w;
+              }));}
+         _E.Case($moduleName,
+         "between lines 10 and 14");
+      }();
+   });
+   _elm.Utils.values = {_op: _op
+                       ,indexedMap2d: indexedMap2d
+                       ,set2d: set2d
+                       ,get2d: get2d
+                       ,takeWhile: takeWhile
+                       ,dropWhile: dropWhile
+                       ,groupBy: groupBy
+                       ,transpose2dList: transpose2dList
+                       ,transposeTable: transposeTable};
+   return _elm.Utils.values;
+};</script></head><body><script type="text/javascript">Elm.fullscreen(Elm.Game)</script><noscript></noscript></body></html>

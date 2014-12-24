@@ -1,0 +1,160 @@
+Elm.Utils = Elm.Utils || {};
+Elm.Utils.make = function (_elm) {
+   "use strict";
+   _elm.Utils = _elm.Utils || {};
+   if (_elm.Utils.values)
+   return _elm.Utils.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Utils";
+   var Array = Elm.Array.make(_elm);
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var transpose2dList = function (rows) {
+      return function () {
+         var _v0 = List.length(List.head(rows));
+         switch (_v0)
+         {case 0:
+            return _L.fromArray([]);}
+         return {ctor: "::"
+                ,_0: A2(List.map,List.head,rows)
+                ,_1: transpose2dList(A2(List.map,
+                List.tail,
+                rows))};
+      }();
+   };
+   var transposeTable = function (t) {
+      return function () {
+         var rows = Array.toList(A2(Array.map,
+         Array.toList,
+         t));
+         return Array.fromList(List.map(Array.fromList)(transpose2dList(rows)));
+      }();
+   };
+   var dropWhile = F2(function (cond,
+   xs) {
+      return function () {
+         switch (xs.ctor)
+         {case "[]":
+            return _L.fromArray([]);}
+         return cond(List.head(xs)) ? A2(dropWhile,
+         cond,
+         List.tail(xs)) : xs;
+      }();
+   });
+   var takeWhile = F2(function (cond,
+   xs) {
+      return function () {
+         switch (xs.ctor)
+         {case "[]":
+            return _L.fromArray([]);}
+         return cond(List.head(xs)) ? {ctor: "::"
+                                      ,_0: List.head(xs)
+                                      ,_1: A2(takeWhile,
+                                      cond,
+                                      List.tail(xs))} : _L.fromArray([]);
+      }();
+   });
+   var groupBy = F2(function (cond,
+   xs) {
+      return function () {
+         switch (xs.ctor)
+         {case "[]":
+            return _L.fromArray([]);}
+         return function () {
+            var rest = A2(dropWhile,
+            function ($) {
+               return Basics.not(cond($));
+            },
+            xs);
+            return function () {
+               switch (rest.ctor)
+               {case "[]":
+                  return _L.fromArray([]);}
+               return {ctor: "::"
+                      ,_0: A2(takeWhile,cond,rest)
+                      ,_1: A2(groupBy,
+                      cond,
+                      A2(dropWhile,cond,rest))};
+            }();
+         }();
+      }();
+   });
+   var get2d = F2(function (_v5,
+   a) {
+      return function () {
+         switch (_v5.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var _v9 = A2(Array.get,
+                 _v5._1,
+                 a);
+                 switch (_v9.ctor)
+                 {case "Just":
+                    return A2(Array.get,
+                      _v5._0,
+                      _v9._0);
+                    case "Nothing":
+                    return Maybe.Nothing;}
+                 _E.Case($moduleName,
+                 "between lines 20 and 22");
+              }();}
+         _E.Case($moduleName,
+         "between lines 20 and 22");
+      }();
+   });
+   var indexedMap2d = function (f) {
+      return Array.indexedMap(F2(function (y,
+      r) {
+         return A2(Array.indexedMap,
+         F2(function (x,a) {
+            return A3(f,x,y,a);
+         }),
+         r);
+      }));
+   };
+   var set2d = F2(function (_v11,
+   v) {
+      return function () {
+         switch (_v11.ctor)
+         {case "_Tuple2":
+            return indexedMap2d(F3(function (i,
+              j,
+              w) {
+                 return _U.eq(i,
+                 _v11._0) && _U.eq(j,
+                 _v11._1) ? v : w;
+              }));}
+         _E.Case($moduleName,
+         "between lines 10 and 14");
+      }();
+   });
+   _elm.Utils.values = {_op: _op
+                       ,indexedMap2d: indexedMap2d
+                       ,set2d: set2d
+                       ,get2d: get2d
+                       ,takeWhile: takeWhile
+                       ,dropWhile: dropWhile
+                       ,groupBy: groupBy
+                       ,transpose2dList: transpose2dList
+                       ,transposeTable: transposeTable};
+   return _elm.Utils.values;
+};

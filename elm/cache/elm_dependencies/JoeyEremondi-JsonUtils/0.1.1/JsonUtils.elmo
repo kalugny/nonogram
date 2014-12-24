@@ -1,0 +1,295 @@
+Elm.JsonUtils = Elm.JsonUtils || {};
+Elm.JsonUtils.make = function (_elm) {
+   "use strict";
+   _elm.JsonUtils = _elm.JsonUtils || {};
+   if (_elm.JsonUtils.values)
+   return _elm.JsonUtils.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "JsonUtils";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Dict = Elm.Dict.make(_elm);
+   var Error = Elm.Error.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var Json = Elm.Json.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var varNamed = F2(function (_v0,
+   name) {
+      return function () {
+         switch (_v0.ctor)
+         {case "Object":
+            return function () {
+                 var _v3 = A2(Dict.get,
+                 name,
+                 _v0._0);
+                 switch (_v3.ctor)
+                 {case "Just": return _v3._0;}
+                 _E.Case($moduleName,
+                 "between lines 168 and 169");
+              }();}
+         _E.Case($moduleName,
+         "between lines 168 and 169");
+      }();
+   });
+   var getTag = function (json) {
+      return function () {
+         switch (json.ctor)
+         {case "Object":
+            return function () {
+                 var _v8 = A2(Dict.get,
+                 "tag",
+                 json._0);
+                 switch (_v8.ctor)
+                 {case "Just":
+                    switch (_v8._0.ctor)
+                      {case "String":
+                         return _v8._0._0;}
+                      break;}
+                 return Error.raise(_L.append("Couldn\'t get tag from JSON",
+                 String.show(json._0)));
+              }();
+            case "String": return json._0;}
+         _E.Case($moduleName,
+         "between lines 157 and 166");
+      }();
+   };
+   var dictToJson = F3(function (keyTo,
+   valueTo,
+   dict) {
+      return function () {
+         var dictList = Dict.toList(dict);
+         var tupleJson = A2(List.map,
+         function (_v11) {
+            return function () {
+               switch (_v11.ctor)
+               {case "_Tuple2":
+                  return Json.Array(_L.fromArray([keyTo(_v11._0)
+                                                 ,valueTo(_v11._1)]));}
+               _E.Case($moduleName,
+               "on line 149, column 32 to 63");
+            }();
+         },
+         dictList);
+         return Json.Array(tupleJson);
+      }();
+   });
+   var dictFromJson = F3(function (keyFrom,
+   valueFrom,
+   _v15) {
+      return function () {
+         switch (_v15.ctor)
+         {case "Array":
+            return function () {
+                 var unJsonTuples = A2(List.map,
+                 function (_v18) {
+                    return function () {
+                       switch (_v18.ctor)
+                       {case "Array":
+                          switch (_v18._0.ctor)
+                            {case "::":
+                               switch (_v18._0._1.ctor)
+                                 {case "::":
+                                    switch (_v18._0._1._1.ctor)
+                                      {case "[]":
+                                         return {ctor: "_Tuple2"
+                                                ,_0: keyFrom(_v18._0._0)
+                                                ,_1: valueFrom(_v18._0._1._0)};}
+                                      break;}
+                                 break;}
+                            break;}
+                       _E.Case($moduleName,
+                       "on line 138, column 54 to 78");
+                    }();
+                 },
+                 _v15._0);
+                 return Dict.fromList(unJsonTuples);
+              }();}
+         _E.Case($moduleName,
+         "between lines 138 and 139");
+      }();
+   });
+   var boolToJson = function (b) {
+      return Json.Boolean(b);
+   };
+   var boolFromJson = function (_v25) {
+      return function () {
+         switch (_v25.ctor)
+         {case "Boolean":
+            return _v25._0;}
+         _E.Case($moduleName,
+         "on line 126, column 33 to 34");
+      }();
+   };
+   var stringToJson = function (s) {
+      return Json.String(s);
+   };
+   var stringFromJson = function (_v28) {
+      return function () {
+         switch (_v28.ctor)
+         {case "String": return _v28._0;}
+         _E.Case($moduleName,
+         "on line 118, column 34 to 35");
+      }();
+   };
+   var floatToJson = Json.Number;
+   var floatFromJson = function (_v31) {
+      return function () {
+         switch (_v31.ctor)
+         {case "Number": return _v31._0;}
+         _E.Case($moduleName,
+         "on line 110, column 33 to 34");
+      }();
+   };
+   var intToJson = function (i) {
+      return Json.Number(Basics.toFloat(i));
+   };
+   var intFromJson = function (_v34) {
+      return function () {
+         switch (_v34.ctor)
+         {case "Number":
+            return Basics.round(_v34._0);}
+         _E.Case($moduleName,
+         "on line 102, column 31 to 38");
+      }();
+   };
+   var maybeFromJson = F2(function (fromJson,
+   json) {
+      return function () {
+         switch (json.ctor)
+         {case "Null":
+            return Maybe.Nothing;}
+         return Maybe.Just(fromJson(json));
+      }();
+   });
+   var listFromJson = F2(function (fromJson,
+   _v38) {
+      return function () {
+         switch (_v38.ctor)
+         {case "Array":
+            return A2(List.map,
+              fromJson,
+              _v38._0);}
+         _E.Case($moduleName,
+         "on line 90, column 48 to 66");
+      }();
+   });
+   var maybeToJson = F2(function (toJson,
+   mval) {
+      return function () {
+         switch (mval.ctor)
+         {case "Just":
+            return toJson(mval._0);
+            case "Nothing":
+            return Json.Null;}
+         _E.Case($moduleName,
+         "between lines 82 and 88");
+      }();
+   });
+   var listToJson = F2(function (toJson,
+   values) {
+      return Json.Array(A2(List.map,
+      toJson,
+      values));
+   });
+   var unpackContents = F2(function (numCtors,
+   json) {
+      return function () {
+         var _v43 = {ctor: "_Tuple2"
+                    ,_0: json
+                    ,_1: numCtors};
+         switch (_v43.ctor)
+         {case "_Tuple2":
+            switch (_v43._0.ctor)
+              {case "Array": switch (_v43._1)
+                   {case 0: return _v43._0._0;}
+                   break;
+                 case "Object":
+                 return function () {
+                      var _v49 = A2(Dict.get,
+                      "contents",
+                      _v43._0._0);
+                      switch (_v49.ctor)
+                      {case "Just":
+                         switch (_v49._0.ctor)
+                           {case "Array":
+                              return _v49._0._0;}
+                           return _L.fromArray([_v49._0]);}
+                      return Error.raise(_L.append("No contents field of JSON ",
+                      String.show(json)));
+                   }();
+                 case "String":
+                 return _L.fromArray([]);}
+              break;}
+         return Error.raise(_L.append("No contents field of JSON. num: ",
+         _L.append(String.show(numCtors),
+         _L.append(" json ",
+         String.show(json)))));
+      }();
+   });
+   var packContents = F3(function (numCtors,
+   name,
+   contentList) {
+      return function () {
+         switch (contentList.ctor)
+         {case "::":
+            switch (contentList._1.ctor)
+              {case "[]": return function () {
+                      var dictList = _L.fromArray([{ctor: "_Tuple2"
+                                                   ,_0: "tag"
+                                                   ,_1: Json.String(name)}
+                                                  ,{ctor: "_Tuple2"
+                                                   ,_0: "contents"
+                                                   ,_1: contentList._0}]);
+                      return Json.Object(Dict.fromList(dictList));
+                   }();}
+              break;}
+         return _U.eq(numCtors,
+         0) ? Json.Array(contentList) : function () {
+            var dictList = _L.fromArray([{ctor: "_Tuple2"
+                                         ,_0: "tag"
+                                         ,_1: Json.String(name)}
+                                        ,{ctor: "_Tuple2"
+                                         ,_0: "contents"
+                                         ,_1: Json.Array(contentList)}]);
+            return Json.Object(Dict.fromList(dictList));
+         }();
+      }();
+   });
+   _elm.JsonUtils.values = {_op: _op
+                           ,packContents: packContents
+                           ,unpackContents: unpackContents
+                           ,listToJson: listToJson
+                           ,maybeToJson: maybeToJson
+                           ,listFromJson: listFromJson
+                           ,maybeFromJson: maybeFromJson
+                           ,intFromJson: intFromJson
+                           ,intToJson: intToJson
+                           ,floatFromJson: floatFromJson
+                           ,floatToJson: floatToJson
+                           ,stringFromJson: stringFromJson
+                           ,stringToJson: stringToJson
+                           ,boolFromJson: boolFromJson
+                           ,boolToJson: boolToJson
+                           ,dictFromJson: dictFromJson
+                           ,dictToJson: dictToJson
+                           ,getTag: getTag
+                           ,varNamed: varNamed};
+   return _elm.JsonUtils.values;
+};

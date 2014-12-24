@@ -1,0 +1,233 @@
+Elm.Board = Elm.Board || {};
+Elm.Board.make = function (_elm) {
+   "use strict";
+   _elm.Board = _elm.Board || {};
+   if (_elm.Board.values)
+   return _elm.Board.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Board";
+   var Array = Elm.Array.make(_elm);
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Consts = Elm.Consts.make(_elm);
+   var Debug = Elm.Debug.make(_elm);
+   var Enemy = Elm.Enemy.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Location = Elm.Location.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Table = Elm.Table.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var Utils = Elm.Utils.make(_elm);
+   var _op = {};
+   var drawBoardWithNumbers = function (b) {
+      return function () {
+         var topNumbersHeight = Basics.toFloat(Table.longestRowSize(Table.rowNumbers(Utils.transposeTable(b.theMap)))) * Consts.cell_size;
+         var leftNumbersWidth = Basics.toFloat(Table.longestRowSize(Table.rowNumbers(b.theMap))) * Consts.cell_size;
+         var topNumbers = A2(Table.drawNumbers,
+         Table.Column,
+         b.theMap);
+         var leftNumbers = A2(Table.drawNumbers,
+         Table.Row,
+         b.theMap);
+         var foggedMap = Graphics.Collage.group(_L.fromArray([Table.drawTable(b.theMap)
+                                                             ,Table.drawTable(b.fog)]));
+         return Graphics.Collage.group(_L.fromArray([A2(Graphics.Collage.moveY,
+                                                    0 - topNumbersHeight,
+                                                    leftNumbers)
+                                                    ,A2(Graphics.Collage.moveX,
+                                                    leftNumbersWidth,
+                                                    topNumbers)
+                                                    ,A2(Graphics.Collage.move,
+                                                    {ctor: "_Tuple2"
+                                                    ,_0: leftNumbersWidth
+                                                    ,_1: 0 - topNumbersHeight},
+                                                    foggedMap)]));
+      }();
+   };
+   var drawHighlight = function (_v0) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var fy = (0 - (Basics.toFloat(_v0._1) + 0.5)) * Consts.cell_size;
+                 var fx = (Basics.toFloat(_v0._0) + 0.5) * Consts.cell_size;
+                 return Graphics.Collage.move({ctor: "_Tuple2"
+                                              ,_0: fx
+                                              ,_1: fy})(Graphics.Collage.outlined(Graphics.Collage.dashed(Color.black))(A2(Graphics.Collage.rect,
+                 Consts.cell_size,
+                 Consts.cell_size)));
+              }();}
+         _E.Case($moduleName,
+         "between lines 98 and 104");
+      }();
+   };
+   var gridToBoard = F2(function (b,
+   _v4) {
+      return function () {
+         switch (_v4.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var topNumbersHeight = Table.longestRowSize(Table.rowNumbers(Utils.transposeTable(b.theMap)));
+                 var leftNumbersWidth = Table.longestRowSize(Table.rowNumbers(b.theMap));
+                 return {ctor: "_Tuple2"
+                        ,_0: _v4._0 - leftNumbersWidth
+                        ,_1: _v4._1 - topNumbersHeight};
+              }();}
+         _E.Case($moduleName,
+         "between lines 74 and 78");
+      }();
+   });
+   var screenToGrid = function (_v8) {
+      return function () {
+         switch (_v8.ctor)
+         {case "_Tuple2":
+            return {ctor: "_Tuple2"
+                   ,_0: Basics.floor(Basics.toFloat(_v8._0) / Consts.cell_size)
+                   ,_1: Basics.floor(Basics.toFloat(_v8._1) / Consts.cell_size)};}
+         _E.Case($moduleName,
+         "between lines 68 and 69");
+      }();
+   };
+   var moveHighlight = F2(function (l,
+   b) {
+      return _U.replace([["highlightedCell"
+                         ,screenToGrid(l)]],
+      b);
+   });
+   var clearFog = F2(function (l,
+   b) {
+      return function () {
+         var newL = gridToBoard(b)(screenToGrid(l));
+         return _U.replace([["fog"
+                            ,A3(Utils.set2d,
+                            newL,
+                            Table.Fog(Table.Revealed),
+                            b.fog)]],
+         b);
+      }();
+   });
+   var seenMap = function (b) {
+      return A2(Utils.indexedMap2d,
+      F3(function (x,y,e) {
+         return function () {
+            var _v12 = A2(Utils.get2d,
+            {ctor: "_Tuple2",_0: x,_1: y},
+            b.fog);
+            switch (_v12.ctor)
+            {case "Just":
+               switch (_v12._0.ctor)
+                 {case "Fog":
+                    switch (_v12._0._0.ctor)
+                      {case "Revealed": return e;}
+                      break;}
+                 break;}
+            return Table.Map(Table.Empty);
+         }();
+      }),
+      b.theMap);
+   };
+   var height = function (b) {
+      return Array.length(b.theMap) + List.maximum(Array.toList(A2(Array.map,
+      function ($) {
+         return List.length(Table.sumRow(Table.Map(Table.Road))($));
+      },
+      Utils.transposeTable(b.theMap))));
+   };
+   var width = function (b) {
+      return List.maximum(Array.toList(A2(Array.map,
+      function (r) {
+         return Array.length(r) + function ($) {
+            return List.length(Table.sumRow(Table.Map(Table.Road))($));
+         }(r);
+      },
+      b.theMap)));
+   };
+   var asElement = function (b) {
+      return function () {
+         var bheight = Basics.floor(Consts.cell_size) * height(b);
+         var bwidth = Basics.floor(Consts.cell_size) * width(b);
+         var collageOffset = {ctor: "_Tuple2"
+                             ,_0: Basics.toFloat(0 - bwidth) / 2
+                             ,_1: Basics.toFloat(bheight) / 2};
+         return A2(Graphics.Collage.collage,
+         bwidth,
+         bheight)(List.map(Graphics.Collage.move(collageOffset))(_L.append(_L.fromArray([drawBoardWithNumbers(b)
+                                                                                        ,drawHighlight(b.highlightedCell)]),
+         A2(List.map,
+         Enemy.asForm,
+         b.enemies))));
+      }();
+   };
+   var empty = F2(function (w,h) {
+      return {_: {}
+             ,enemies: _L.fromArray([])
+             ,fog: A2(Table.fullFog,w,h)
+             ,highlightedCell: {ctor: "_Tuple2"
+                               ,_0: 0
+                               ,_1: 0}
+             ,theMap: Array.fromList(_L.fromArray([Array.fromList(_L.fromArray([Table.Map(Table.Road)
+                                                                               ,Table.Map(Table.Road)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Road)]))
+                                                  ,Array.fromList(_L.fromArray([Table.Map(Table.Road)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Road)]))
+                                                  ,Array.fromList(_L.fromArray([Table.Map(Table.Road)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Empty)]))
+                                                  ,Array.fromList(_L.fromArray([Table.Map(Table.Road)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Road)
+                                                                               ,Table.Map(Table.Road)]))
+                                                  ,Array.fromList(_L.fromArray([Table.Map(Table.Road)
+                                                                               ,Table.Map(Table.Road)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Empty)
+                                                                               ,Table.Map(Table.Road)]))]))};
+   });
+   var Board = F4(function (a,
+   b,
+   c,
+   d) {
+      return {_: {}
+             ,enemies: d
+             ,fog: b
+             ,highlightedCell: c
+             ,theMap: a};
+   });
+   _elm.Board.values = {_op: _op
+                       ,empty: empty
+                       ,width: width
+                       ,height: height
+                       ,seenMap: seenMap
+                       ,screenToGrid: screenToGrid
+                       ,gridToBoard: gridToBoard
+                       ,moveHighlight: moveHighlight
+                       ,clearFog: clearFog
+                       ,drawHighlight: drawHighlight
+                       ,drawBoardWithNumbers: drawBoardWithNumbers
+                       ,asElement: asElement
+                       ,Board: Board};
+   return _elm.Board.values;
+};

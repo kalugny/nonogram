@@ -1,0 +1,73 @@
+Elm.Game = Elm.Game || {};
+Elm.Game.make = function (_elm) {
+   "use strict";
+   _elm.Game = _elm.Game || {};
+   if (_elm.Game.values)
+   return _elm.Game.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Game";
+   var Array = Elm.Array.make(_elm);
+   var Basics = Elm.Basics.make(_elm);
+   var Board = Elm.Board.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Consts = Elm.Consts.make(_elm);
+   var Debug = Elm.Debug.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Location = Elm.Location.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Mouse = Elm.Mouse.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var change = F3(function (b,
+   mp,
+   cp) {
+      return Board.asElement(Board.moveHighlight(mp)(A3(List.foldl,
+      F2(function (c,brd) {
+         return A2(Board.clearFog,
+         c,
+         brd);
+      }),
+      b,
+      cp)));
+   });
+   var clickSignal = A2(Signal.sampleOn,
+   Mouse.clicks,
+   Mouse.position);
+   var clicks = A3(Signal.foldp,
+   F2(function (x,y) {
+      return {ctor: "::"
+             ,_0: x
+             ,_1: y};
+   }),
+   _L.fromArray([]),
+   clickSignal);
+   var game = {_: {}
+              ,board: A2(Board.empty,5,5)};
+   var main = A2(Signal._op["~"],
+   A2(Signal._op["<~"],
+   change(game.board),
+   Mouse.position),
+   clicks);
+   _elm.Game.values = {_op: _op
+                      ,game: game
+                      ,clickSignal: clickSignal
+                      ,clicks: clicks
+                      ,change: change
+                      ,main: main};
+   return _elm.Game.values;
+};

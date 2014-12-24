@@ -1,0 +1,5 @@
+C:\Code\Prototypes\MultiplayerNonogram\MultiplayerNonogram\bin\MultiplayerNonogram.dll.config
+C:\Code\Prototypes\MultiplayerNonogram\MultiplayerNonogram\bin\MultiplayerNonogram.dll
+C:\Code\Prototypes\MultiplayerNonogram\MultiplayerNonogram\bin\MultiplayerNonogram.pdb
+C:\Code\Prototypes\MultiplayerNonogram\MultiplayerNonogram\obj\Debug\MultiplayerNonogram.dll
+C:\Code\Prototypes\MultiplayerNonogram\MultiplayerNonogram\obj\Debug\MultiplayerNonogram.pdb

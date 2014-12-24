@@ -1,0 +1,13 @@
+{ "version": "0.1"
+  , "summary": "Uncatchable Errors"
+  , "description":
+  "This library gives a way to raise uncatchable errors that terminate a program and log an error message.
+
+This is useful for debugging and defensive programming. See Error for more details.
+"
+  , "license":         "BSD3"
+  , "repository":      "http://github.com/maxsnew/Error.git"
+  , "elm-version":     "0.10.1"
+  , "dependencies":    {}
+  , "exposed-modules": [ "Error" ]
+}

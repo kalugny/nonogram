@@ -1,0 +1,217 @@
+Elm.Table = Elm.Table || {};
+Elm.Table.make = function (_elm) {
+   "use strict";
+   _elm.Table = _elm.Table || {};
+   if (_elm.Table.values)
+   return _elm.Table.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Table";
+   var Array = Elm.Array.make(_elm);
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Consts = Elm.Consts.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Location = Elm.Location.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var Utils = Elm.Utils.make(_elm);
+   var _op = {};
+   var offsetCell = Graphics.Collage.move({ctor: "_Tuple2"
+                                          ,_0: Consts.cell_size / 2
+                                          ,_1: (0 - Consts.cell_size) / 2});
+   var numbers_style = Text.defaultStyle;
+   var styleNumber = function ($) {
+      return offsetCell(Graphics.Collage.toForm(A3(Graphics.Element.container,
+      Consts.icell_size,
+      Consts.icell_size,
+      Graphics.Element.middle)(Text.centered(Text.style(numbers_style)(Text.toText(String.show($)))))));
+   };
+   var longestRowSize = function (ns) {
+      return List.maximum(Array.toList(A2(Array.map,
+      Array.length,
+      ns)));
+   };
+   var sumRow = F2(function (filled,
+   r) {
+      return function () {
+         var l = List.map(List.length)(Utils.groupBy(F2(function (x,
+         y) {
+            return _U.eq(x,y);
+         })(filled))(Array.toList(r)));
+         return function () {
+            switch (l.ctor)
+            {case "[]":
+               return _L.fromArray([0]);}
+            return l;
+         }();
+      }();
+   });
+   var Column = {ctor: "Column"};
+   var Row = {ctor: "Row"};
+   var drawNumbersRow = F3(function (dir,
+   max_len,
+   nums) {
+      return function () {
+         var moveFunc = function (f) {
+            return function () {
+               switch (dir.ctor)
+               {case "Column":
+                  return Graphics.Collage.moveY(0 - f);
+                  case "Row":
+                  return Graphics.Collage.moveX(f);}
+               _E.Case($moduleName,
+               "between lines 66 and 69");
+            }();
+         };
+         var margin = max_len - Array.length(nums);
+         return moveFunc(Basics.toFloat(margin) * Consts.cell_size)(Graphics.Collage.group(Array.toList(A2(Array.indexedMap,
+         F2(function (i,n) {
+            return moveFunc(Basics.toFloat(i) * Consts.cell_size)(styleNumber(n));
+         }),
+         nums))));
+      }();
+   });
+   var Map = function (a) {
+      return {ctor: "Map",_0: a};
+   };
+   var Fog = function (a) {
+      return {ctor: "Fog",_0: a};
+   };
+   var Revealed = {ctor: "Revealed"};
+   var Hidden = {ctor: "Hidden"};
+   var fullFog = F2(function (w,
+   h) {
+      return Array.repeat(h)(Array.fromList({ctor: "::"
+                                            ,_0: Fog(Revealed)
+                                            ,_1: A2(List.repeat,
+                                            w - 1,
+                                            Fog(Hidden))}));
+   });
+   var Tower = {ctor: "Tower"};
+   var Empty = {ctor: "Empty"};
+   var Road = {ctor: "Road"};
+   var rowNumbers = Array.map(function ($) {
+      return Array.fromList(sumRow(Map(Road))($));
+   });
+   var drawNumbers = F2(function (dir,
+   tab) {
+      return function () {
+         var moveFunc = function (f) {
+            return function () {
+               switch (dir.ctor)
+               {case "Column":
+                  return Graphics.Collage.moveX(f);
+                  case "Row":
+                  return Graphics.Collage.moveY(0 - f);}
+               _E.Case($moduleName,
+               "between lines 85 and 88");
+            }();
+         };
+         var t = function () {
+            switch (dir.ctor)
+            {case "Column":
+               return Utils.transposeTable(tab);
+               case "Row": return tab;}
+            _E.Case($moduleName,
+            "between lines 81 and 84");
+         }();
+         var numbers = rowNumbers(t);
+         return Graphics.Collage.group(Array.toList(A2(Array.indexedMap,
+         F2(function (i,r) {
+            return moveFunc(Basics.toFloat(i) * Consts.cell_size)(A3(drawNumbersRow,
+            dir,
+            longestRowSize(numbers),
+            r));
+         }),
+         numbers)));
+      }();
+   });
+   var drawCell = function (c) {
+      return offsetCell(function () {
+         switch (c.ctor)
+         {case "Fog":
+            return function () {
+                 switch (c._0.ctor)
+                 {case "Hidden":
+                    return Graphics.Collage.filled(Color.lightGray)(A2(Graphics.Collage.rect,
+                      Consts.cell_size,
+                      Consts.cell_size));
+                    case "Revealed":
+                    return Graphics.Collage.toForm(Graphics.Element.empty);}
+                 _E.Case($moduleName,
+                 "between lines 107 and 109");
+              }();
+            case "Map": return function () {
+                 switch (c._0.ctor)
+                 {case "Empty":
+                    return Graphics.Collage.filled(Color.darkCharcoal)(A2(Graphics.Collage.rect,
+                      Consts.cell_size,
+                      Consts.cell_size));
+                    case "Road":
+                    return Graphics.Collage.filled(Color.lightGreen)(A2(Graphics.Collage.rect,
+                      Consts.cell_size,
+                      Consts.cell_size));
+                    case "Tower":
+                    return Graphics.Collage.group(_L.fromArray([Graphics.Collage.filled(Color.darkCharcoal)(A2(Graphics.Collage.rect,
+                                                               Consts.cell_size,
+                                                               Consts.cell_size))
+                                                               ,Graphics.Collage.filled(Color.lightBlue)(Graphics.Collage.ngon(6)(Consts.cell_size / 2))]));}
+                 _E.Case($moduleName,
+                 "between lines 100 and 107");
+              }();}
+         _E.Case($moduleName,
+         "between lines 99 and 109");
+      }());
+   };
+   var drawRow = function (r) {
+      return Graphics.Collage.group(Array.toList(A2(Array.indexedMap,
+      F2(function (i,c) {
+         return Graphics.Collage.moveX(Basics.toFloat(i) * Consts.cell_size)(drawCell(c));
+      }),
+      r)));
+   };
+   var drawTable = function ($) {
+      return Graphics.Collage.group(Array.toList(Array.indexedMap(F2(function (i,
+      r) {
+         return Graphics.Collage.moveY(0 - Basics.toFloat(i) * Consts.cell_size)(drawRow(r));
+      }))($)));
+   };
+   _elm.Table.values = {_op: _op
+                       ,fullFog: fullFog
+                       ,sumRow: sumRow
+                       ,longestRowSize: longestRowSize
+                       ,rowNumbers: rowNumbers
+                       ,numbers_style: numbers_style
+                       ,offsetCell: offsetCell
+                       ,styleNumber: styleNumber
+                       ,drawNumbersRow: drawNumbersRow
+                       ,drawNumbers: drawNumbers
+                       ,drawCell: drawCell
+                       ,drawRow: drawRow
+                       ,drawTable: drawTable
+                       ,Road: Road
+                       ,Empty: Empty
+                       ,Tower: Tower
+                       ,Hidden: Hidden
+                       ,Revealed: Revealed
+                       ,Fog: Fog
+                       ,Map: Map
+                       ,Row: Row
+                       ,Column: Column};
+   return _elm.Table.values;
+};
